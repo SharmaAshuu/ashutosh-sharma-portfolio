@@ -1,14 +1,12 @@
 """
 app.py — Streamlit Resume App for Ashutosh Sharma
-Run locally : streamlit run app.py
-Deploy      : Push to GitHub → connect to Streamlit Cloud
+Run: streamlit run app.py
 """
 
 import streamlit as st
 import streamlit.components.v1 as components
 from pathlib import Path
 
-# ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="Ashutosh Sharma | Data Analyst",
     page_icon="📊",
@@ -16,7 +14,6 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ── Load assets ───────────────────────────────────────────────────────────────
 def load_file(path: str) -> str:
     return Path(path).read_text(encoding="utf-8")
 
@@ -28,64 +25,54 @@ with st.sidebar:
     st.markdown("## 👤 Ashutosh Sharma")
     st.markdown("**Data Analyst** · Pune, India")
     st.divider()
-
     st.markdown("### 🔗 Navigate")
-    nav_items = [
-        ("🏠", "Home",      "home"),
-        ("🙋", "About Me",  "about"),
-        ("🛠️", "Skills",    "skills"),
-        ("📁", "Projects",  "projects"),
-        ("🎓", "Education", "education"),
-        ("📬", "Contact",   "contact"),
-    ]
-    for icon, label, anchor in nav_items:
-        if st.button(f"{icon} {label}", key=anchor, use_container_width=True):
-            st.markdown(
-                f"<script>document.getElementById('resume-frame')"
-                f".contentWindow.document.getElementById('{anchor}')"
-                f".scrollIntoView({{behavior:'smooth'}});</script>",
-                unsafe_allow_html=True,
-            )
-
+    for icon, label, anchor in [
+        ("🏠","Home","home"), ("🙋","About Me","about"),
+        ("🛠️","Skills","skills"), ("📁","Projects","projects"),
+        ("🎓","Education","education"), ("📬","Contact","contact"),
+    ]:
+        st.markdown(
+            f'<a href="#{anchor}" style="display:block;padding:8px 14px;margin:3px 0;'
+            f'background:#f0eff8;border-radius:8px;text-decoration:none;color:#3b0080;'
+            f'font-family:Poppins,sans-serif;font-size:0.88rem;font-weight:500;">'
+            f'{icon} {label}</a>',
+            unsafe_allow_html=True,
+        )
     st.divider()
     st.markdown("### 📬 Quick Contact")
     st.markdown("📧 sharma.ashutosh.work@gmail.com")
     st.markdown("📞 +91 92840 73347")
-
     st.divider()
     st.markdown("### 🌐 Links")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.link_button("LinkedIn", "https://linkedin.com/in/ashutosh-sharma-in",
-                       use_container_width=True)
-    with col2:
-        st.link_button("GitHub", "https://github.com/SharmaAshuu",
-                       use_container_width=True)
-
+    c1, c2 = st.columns(2)
+    c1.link_button("LinkedIn", "https://linkedin.com/in/ashutosh-sharma-in", use_container_width=True)
+    c2.link_button("GitHub",   "https://github.com/SharmaAshuu",            use_container_width=True)
     st.divider()
-    st.caption("© Ashutosh Sharma · Built with Streamlit")
+    st.caption("© Ashutosh Sharma · Streamlit")
 
-# ── Hide Streamlit chrome & padding ──────────────────────────────────────────
+# ── Strip ALL Streamlit chrome & padding ─────────────────────────────────────
 st.markdown("""
 <style>
-  header[data-testid="stHeader"]  { display: none !important; }
-  .block-container                 { padding: 0 !important; max-width: 100% !important; }
-  [data-testid="stAppViewContainer"] > section > div { padding: 0 !important; }
+  header[data-testid="stHeader"] { display:none !important; }
+  footer                          { display:none !important; }
+  .block-container                { padding:0 !important; max-width:100% !important; }
+  section.main > div              { padding:0 !important; }
+  [data-testid="stAppViewContainer"] > section { padding:0 !important; }
+  iframe                          { display:block; border:none; width:100% !important; }
 </style>
 """, unsafe_allow_html=True)
 
-# ── Build self-contained page (CSS inlined so no file-serving needed) ─────────
+# ── Build full self-contained document ───────────────────────────────────────
 full_page = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
-    * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-    body {{ margin: 0; padding: 0; overflow-x: hidden; }}
+    *{{box-sizing:border-box;margin:0;padding:0;}}
+    html,body{{margin:0;padding:0;overflow-x:hidden;width:100%;height:100%;}}
     {css_content}
   </style>
 </head>
@@ -94,5 +81,5 @@ full_page = f"""<!DOCTYPE html>
 </body>
 </html>"""
 
-# ── Render in a full-height iframe (bypasses Streamlit's HTML sanitiser) ──────
-components.html(full_page, height=5600, scrolling=True)
+# height=9500 covers all sections; scrolling=True lets user scroll inside
+components.html(full_page, height=9500, scrolling=True)
