@@ -5,6 +5,7 @@ Deploy      : Push to GitHub → connect to Streamlit Cloud
 """
 
 import streamlit as st
+import streamlit.components.v1 as components
 from pathlib import Path
 
 # ── Page config ──────────────────────────────────────────────────────────────
@@ -29,62 +30,68 @@ with st.sidebar:
     st.divider()
 
     st.markdown("### 🔗 Navigate")
-    st.markdown("""
-- [🏠 Home](#home)
-- [🙋 About Me](#about)
-- [🛠️ Skills](#skills)
-- [📁 Projects](#projects)
-- [🎓 Education](#education)
-- [📬 Contact](#contact)
-""", unsafe_allow_html=True)
+    # JavaScript postMessage scrolls to section inside the iframe
+    nav_items = [
+        ("🏠", "Home",      "home"),
+        ("🙋", "About Me",  "about"),
+        ("🛠️", "Skills",    "skills"),
+        ("📁", "Projects",  "projects"),
+        ("🎓", "Education", "education"),
+        ("📬", "Contact",   "contact"),
+    ]
+    for icon, label, anchor in nav_items:
+        if st.button(f"{icon} {label}", key=anchor, use_container_width=True):
+            # JS injected to scroll the iframe to the anchor
+            st.markdown(
+                f"<script>document.getElementById('resume-frame')"
+                f".contentWindow.document.getElementById('{anchor}')"
+                f".scrollIntoView({{behavior:'smooth'}});</script>",
+                unsafe_allow_html=True,
+            )
 
     st.divider()
-
     st.markdown("### 📬 Quick Contact")
     st.markdown("📧 sharma.ashutosh.work@gmail.com")
     st.markdown("📞 +91 92840 73347")
 
     st.divider()
-
     st.markdown("### 🌐 Links")
     col1, col2 = st.columns(2)
     with col1:
-        st.link_button("LinkedIn", "https://linkedin.com/in/ashutosh-sharma-in", use_container_width=True)
+        st.link_button("LinkedIn", "https://linkedin.com/in/ashutosh-sharma-in",
+                       use_container_width=True)
     with col2:
-        st.link_button("GitHub", "https://github.com/SharmaAshuu", use_container_width=True)
+        st.link_button("GitHub", "https://github.com/SharmaAshuu",
+                       use_container_width=True)
 
     st.divider()
-    st.caption("Built with Streamlit · 2024")
+    st.caption("© Ashutosh Sharma · Built with Streamlit")
 
-# ── Inject CSS + render HTML ─────────────────────────────────────────────────
-# Embed the external CSS inline so Streamlit Cloud doesn't need to serve it
-st.markdown(f"<style>{css_content}</style>", unsafe_allow_html=True)
-
-# Remove default Streamlit padding so the hero fills edge-to-edge
+# ── Hide Streamlit chrome, remove padding ─────────────────────────────────────
 st.markdown("""
 <style>
-  /* Remove Streamlit's default page padding */
-  .block-container { padding: 0 !important; max-width: 100% !important; }
-  header[data-testid="stHeader"] { display: none; }
-  /* Scrollable anchor support */
-  html { scroll-behavior: smooth; }
+  header[data-testid="stHeader"]  { display: none !important; }
+  .block-container                 { padding: 0 !important; max-width: 100% !important; }
+  [data-testid="stAppViewContainer"] > section > div { padding: 0 !important; }
 </style>
 """, unsafe_allow_html=True)
 
-# Render the full HTML resume
-st.markdown(html_content, unsafe_allow_html=True)
+# ── Build self-contained HTML document (inlines CSS) ─────────────────────────
+# This avoids Streamlit's HTML sanitiser stripping <section>, <article>, etc.
+full_page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet"/>
+  <style>{css_content}</style>
+</head>
+<body>
+{html_content}
+</body>
+</html>"""
 
-# ── Footer ────────────────────────────────────────────────────────────────────
-st.markdown("""
-<div style="
-  text-align:center;
-  padding: 14px;
-  font-family: 'Poppins', sans-serif;
-  font-size: .78rem;
-  color: #888;
-  border-top: 1px solid #e5e7eb;
-  margin-top: 0;
-">
-  © Ashutosh Sharma · Data Analyst · Pune, India
-</div>
-""", unsafe_allow_html=True)
+# ── Render inside a full-height iframe ───────────────────────────────────────
+components.html(full_page, height=5800, scrolling=True)
