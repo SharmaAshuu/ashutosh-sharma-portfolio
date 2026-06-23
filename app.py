@@ -82,4 +82,9 @@ full_page = f"""<!DOCTYPE html>
 </html>"""
 
 # height=9500 covers all sections; scrolling=True lets user scroll inside
-components.html(full_page, height=9500, scrolling=True)
+# Auto-fit height for desktop/laptop
+components.html(
+    full_page,
+    height=1200,
+    scrolling=True
+)
